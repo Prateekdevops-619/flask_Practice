@@ -1,6 +1,6 @@
 # Student Registration System
 
-A simple **Flask** web application to manage student records with **MongoDB** as the backend database. Users can **add, view, update, and delete** student details.
+A simple **Flask** web application to manage student records with **MongoDB Atlas** as the backend database. Users can **add, view, update, and delete** student details.
 
 ---
 
@@ -11,16 +11,31 @@ A simple **Flask** web application to manage student records with **MongoDB** as
 * Update existing student details
 * Delete a student with confirmation
 * Simple and responsive UI using Bootstrap
+* Fully automated CI/CD pipeline via Jenkins
 
 ---
 
 ## Tech Stack
 
 * **Backend:** Python, Flask
-* **Database:** MongoDB (via Flask-PyMongo)
+* **Database:** MongoDB Atlas (via Flask-PyMongo)
 * **Frontend:** HTML, Jinja2 templates, Bootstrap 5
 * **Environment Variables:** Managed via `.env` file
 * **CI/CD:** Jenkins Pipeline
+
+---
+
+## Screenshots
+
+### Home Page
+Lists all students with Edit/Delete buttons.
+
+![Home Page](screenshots/app_home.png)
+
+### Add Student
+Form to add a new student.
+
+![Add Student](screenshots/app_add_student.png)
 
 ---
 
@@ -54,7 +69,7 @@ pip install -r requirements.txt
 Create a `.env` file in the project root:
 
 ```
-MONGO_URI=<your-mongodb-connection-string>
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/students?retryWrites=true&w=majority
 SECRET_KEY=<your-secret-key>
 ```
 
@@ -79,6 +94,14 @@ python -m pytest test_app.py -v
 
 ```
 flask_Practice/
+├── screenshots/
+│   ├── app_home.png
+│   ├── app_add_student.png
+│   ├── jenkins_stage_view.png
+│   ├── jenkins_build_success.png
+│   ├── jenkins_tests_passed.png
+│   ├── jenkins_finished.png
+│   └── mongodb_atlas.png
 ├── templates/
 │   ├── base.html
 │   ├── index.html
@@ -94,6 +117,16 @@ flask_Practice/
 
 ---
 
+## MongoDB Atlas
+
+The application uses **MongoDB Atlas** (free M0 cluster) as the cloud database backend.
+
+![MongoDB Atlas Cluster](screenshots/mongodb_atlas.png)
+
+> Cluster: **MongoMernPrateek** | Region: AWS / Mumbai (ap-south-1) | Active connections: 4
+
+---
+
 ## Jenkins CI/CD Pipeline
 
 ### Overview
@@ -105,17 +138,34 @@ This project includes a fully automated Jenkins CI/CD pipeline defined in the `J
 | Stage | Description |
 |-------|-------------|
 | **Clone Repository** | Checks out the latest code from the `main` branch on GitHub |
-| **Build** | Creates a Python virtual environment and installs all dependencies from `requirements.txt` |
-| **Test** | Runs the unit test suite using `pytest` |
-| **Deploy to Staging** | Deploys the application to a staging environment (only on the `main` branch) |
+| **Build** | Installs all dependencies from `requirements.txt` using pip3 |
+| **Test** | Runs the unit test suite using pytest (6 tests) |
+| **Deploy to Staging** | Deploys the Flask application to the staging environment |
+
+### Pipeline Stage View
+
+All stages passing successfully across multiple builds:
+
+![Jenkins Stage View](screenshots/jenkins_stage_view.png)
+
+### Build #9 — Successful Execution
+
+![Jenkins Build Success](screenshots/jenkins_build_success.png)
+
+### Test Results — All 6 Tests Passed
+
+![Jenkins Tests Passed](screenshots/jenkins_tests_passed.png)
+
+### Pipeline Completion
+
+![Jenkins Finished Success](screenshots/jenkins_finished.png)
 
 ### Pipeline Flow
 
 ```
 Push to main → Clone → Build (pip install) → Test (pytest) → Deploy to Staging
                                                   ↓
-                                           Email Notification
-                                        (Success or Failure)
+                                        Post: Success/Failure message
 ```
 
 ### Prerequisites
@@ -126,30 +176,11 @@ Before setting up the Jenkins pipeline, ensure the following:
 2. **Python 3.x** installed on the Jenkins agent
 3. **pip** package manager available
 4. **Git** installed on the Jenkins agent
-5. **MongoDB** accessible from the Jenkins environment
+5. **MongoDB Atlas** cluster accessible from the Jenkins environment
 
 ### Jenkins Setup Steps
 
-#### Step 1: Configure Jenkins Credentials
-
-In Jenkins, go to **Manage Jenkins → Credentials → System → Global credentials** and add:
-
-| Credential ID | Type | Description |
-|---------------|------|-------------|
-| `mongo-uri` | Secret text | MongoDB connection string (e.g., `mongodb://localhost:27017/students`) |
-| `secret-key` | Secret text | Flask application secret key |
-
-#### Step 2: Install Required Jenkins Plugins
-
-Ensure the following plugins are installed via **Manage Jenkins → Manage Plugins**:
-
-- **Pipeline** (workflow-aggregator)
-- **Git** plugin
-- **GitHub** plugin
-- **Email Extension** plugin
-- **Pipeline Stage View** plugin
-
-#### Step 3: Create the Pipeline Job
+#### Step 1: Create the Pipeline Job
 
 1. Click **New Item** in Jenkins
 2. Enter a name (e.g., `flask-student-app`)
@@ -160,9 +191,10 @@ Ensure the following plugins are installed via **Manage Jenkins → Manage Plugi
    - **Repository URL**: `https://github.com/Prateekdevops-619/flask_Practice.git`
    - **Branch Specifier**: `*/main`
    - **Script Path**: `Jenkinsfile`
-5. Click **Save**
+5. Under **Build Triggers**, enable: **GitHub hook trigger for GITScm polling**
+6. Click **Save**
 
-#### Step 4: Configure GitHub Webhook (Auto-Trigger)
+#### Step 2: Configure GitHub Webhook (Auto-Trigger)
 
 1. Go to your GitHub repository → **Settings → Webhooks → Add webhook**
 2. Set:
@@ -173,46 +205,12 @@ Ensure the following plugins are installed via **Manage Jenkins → Manage Plugi
 
 This enables automatic builds whenever code is pushed to the `main` branch.
 
-#### Step 5: Configure Email Notifications
-
-1. Go to **Manage Jenkins → Configure System**
-2. Under **E-mail Notification**, configure:
-   - **SMTP Server**: Your SMTP server (e.g., `smtp.gmail.com`)
-   - **SMTP Port**: `465` (SSL) or `587` (TLS)
-   - **Use SSL/TLS**: Enabled
-   - **SMTP Authentication**: Provide email credentials
-3. Under **Extended E-mail Notification**, configure the same SMTP settings
-4. Test the configuration by sending a test email
-
-### Trigger Mechanism
-
-The pipeline is triggered automatically via:
-
-- **GitHub Webhook**: Fires on every push to the `main` branch
-- **Manual Build**: Can also be triggered manually from the Jenkins dashboard
-
 ### Notifications
 
-The pipeline sends email notifications on:
+The pipeline prints notifications on:
 
-- **Build Success**: Confirmation that the application was built, tested, and deployed
-- **Build Failure**: Alert with a link to the build console for debugging
-
----
-
-## Screenshots
-
-**Home Page**
-Lists all students with Edit/Delete buttons.
-- <img width="1902" height="607" alt="image" src="https://github.com/user-attachments/assets/a58a6a6d-4978-4769-8074-232e4d31e69d" />
-
-**Add Student**
-Form to add a new student.
-- <img width="1897" height="801" alt="image" src="https://github.com/user-attachments/assets/d65d25c3-ebb5-410a-adb1-e130ad7c5878" />
-
-**Update Student**
-Form pre-filled with student details.
-- <img width="1905" height="897" alt="image" src="https://github.com/user-attachments/assets/04febf01-879f-431f-ab07-abcfb993acf1" />
+- **Build Success**: `Pipeline succeeded! Build #N completed successfully.`
+- **Build Failure**: `Pipeline failed! Build #N failed. Check console output.`
 
 ---
 
