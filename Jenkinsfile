@@ -16,11 +16,10 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    python3 -m venv venv || python -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    pip install pytest
+                    pip3 install --upgrade pip --quiet
+                    pip3 install -r requirements.txt --quiet
+                    pip3 install pytest --quiet
+                    echo "Dependencies installed successfully"
                 '''
             }
         }
@@ -28,8 +27,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    . venv/bin/activate
-                    python -m pytest test_app.py -v --tb=short
+                    python3 -m pytest test_app.py -v --tb=short
                 '''
             }
         }
@@ -41,9 +39,8 @@ pipeline {
             steps {
                 sh '''
                     echo "Deploying to staging environment..."
-                    . venv/bin/activate
-                    pkill -f "python app.py" || true
-                    nohup python app.py &
+                    pkill -f "python3 app.py" || true
+                    nohup python3 app.py &
                     sleep 3
                     echo "Application deployed on port 8000"
                 '''
