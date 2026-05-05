@@ -34,16 +34,20 @@ pipeline {
         }
 
         stage('Deploy to Staging') {
-            when {
-                branch 'main'
-            }
             steps {
                 sh '''
                     echo "Deploying to staging environment..."
                     pkill -f "python3 app.py" || true
-                    nohup python3 app.py &
-                    sleep 3
-                    echo "Application deployed on port 8000"
+                    export MONGO_URI="mongodb://localhost:27017/students"
+                    export SECRET_KEY="staging-secret-key"
+                    nohup python3 app.py > app.log 2>&1 &
+                    sleep 5
+                    if curl -s --max-time 5 http://localhost:8000 > /dev/null; then
+                        echo "Application is running on port 8000"
+                    else
+                        echo "Warning: App may still be starting. Check app.log for details."
+                        cat app.log || true
+                    fi
                 '''
             }
         }
