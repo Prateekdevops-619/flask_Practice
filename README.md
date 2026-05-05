@@ -131,7 +131,7 @@ The application uses **MongoDB Atlas** (free M0 cluster) as the cloud database b
 
 ### Overview
 
-This project includes a fully automated Jenkins CI/CD pipeline defined in the `Jenkinsfile`. The pipeline automates building, testing, and deploying the Flask application.
+This project includes a fully automated Jenkins CI/CD pipeline defined in the [`Jenkinsfile`](https://github.com/Prateekdevops-619/flask_Practice/blob/main/Jenkinsfile). The pipeline automates building, testing, and deploying the Flask application.
 
 ### Pipeline Stages
 
