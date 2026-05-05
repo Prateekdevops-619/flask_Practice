@@ -18,6 +18,8 @@ pipeline {
                 sh '''
                     pip3 install --upgrade pip --break-system-packages --quiet
                     pip3 uninstall bson -y 2>/dev/null || true
+                    rm -rf /var/lib/jenkins/.local/lib/python3.12/site-packages/bson* 2>/dev/null || true
+                    pip3 install --force-reinstall pymongo Flask-PyMongo --break-system-packages --quiet
                     pip3 install -r requirements.txt --break-system-packages --quiet
                     pip3 install pytest --break-system-packages --quiet
                     echo "Dependencies installed successfully"
