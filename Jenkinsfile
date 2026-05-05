@@ -16,9 +16,9 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    pip3 install --upgrade pip --quiet
-                    pip3 install -r requirements.txt --quiet
-                    pip3 install pytest --quiet
+                    pip3 install --upgrade pip --break-system-packages --quiet
+                    pip3 install -r requirements.txt --break-system-packages --quiet
+                    pip3 install pytest --break-system-packages --quiet
                     echo "Dependencies installed successfully"
                 '''
             }
