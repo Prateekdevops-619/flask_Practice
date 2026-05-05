@@ -152,13 +152,6 @@ All stages passing successfully across multiple builds:
 
 ![Jenkins Build Success](screenshots/jenkins_build_success.png)
 
-### Test Results — All 6 Tests Passed
-
-![Jenkins Tests Passed](screenshots/jenkins_tests_passed.png)
-
-### Pipeline Completion
-
-![Jenkins Finished Success](screenshots/jenkins_finished.png)
 
 ### Pipeline Flow
 
