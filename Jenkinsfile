@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        MONGO_URI = credentials('mongo-uri')
-        SECRET_KEY = credentials('secret-key')
-    }
-
     triggers {
         githubPush()
     }
@@ -21,7 +16,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    python3 -m venv venv
+                    python3 -m venv venv || python -m venv venv
                     . venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
@@ -47,12 +42,10 @@ pipeline {
                 sh '''
                     echo "Deploying to staging environment..."
                     . venv/bin/activate
-                    # Stop any existing instance
                     pkill -f "python app.py" || true
-                    # Start the app in the background on the staging port
                     nohup python app.py &
                     sleep 3
-                    echo "Application deployed successfully on port 8000"
+                    echo "Application deployed on port 8000"
                 '''
             }
         }
@@ -60,29 +53,10 @@ pipeline {
 
     post {
         success {
-            mail to: 'prateektiwari619@gmail.com',
-                 subject: "SUCCESS: Pipeline '${env.JOB_NAME}' Build #${env.BUILD_NUMBER}",
-                 body: """Build succeeded!
-
-Job: ${env.JOB_NAME}
-Build: #${env.BUILD_NUMBER}
-URL: ${env.BUILD_URL}
-
-Changes deployed to staging."""
+            echo "Pipeline succeeded! Build #${env.BUILD_NUMBER} completed successfully."
         }
         failure {
-            mail to: 'prateektiwari619@gmail.com',
-                 subject: "FAILURE: Pipeline '${env.JOB_NAME}' Build #${env.BUILD_NUMBER}",
-                 body: """Build failed!
-
-Job: ${env.JOB_NAME}
-Build: #${env.BUILD_NUMBER}
-URL: ${env.BUILD_URL}
-
-Please check the console output for details."""
-        }
-        always {
-            cleanWs()
+            echo "Pipeline failed! Build #${env.BUILD_NUMBER} failed. Check console output: ${env.BUILD_URL}"
         }
     }
 }
