@@ -17,6 +17,7 @@ pipeline {
             steps {
                 sh '''
                     pip3 install --upgrade pip --break-system-packages --quiet
+                    pip3 uninstall bson -y 2>/dev/null || true
                     pip3 install -r requirements.txt --break-system-packages --quiet
                     pip3 install pytest --break-system-packages --quiet
                     echo "Dependencies installed successfully"
